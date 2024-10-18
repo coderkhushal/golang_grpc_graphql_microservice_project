@@ -12,7 +12,7 @@ RUN go mod download
 
 # Copy the source code
 COPY vendor vendor
-COPY catalog catalog
+COPY order order
 
 # Build the Go application
 RUN GO111MODULE=on go build -mod vendor -o /go/bin/app ./order/cmd/order

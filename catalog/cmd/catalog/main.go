@@ -4,38 +4,36 @@ import (
 	"log"
 	"time"
 
-	"github.com/coderkhushal/go-grpc-graphql-microservices/account"
+	"github.com/coderkhushal/go-grpc-graphql-microservices/catalog"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/tinrab/retry"
 )
 
-type config struct {
+type Config struct {
 	DatabaseURL string `envconfig:"DATABASE_URL"`
 }
 
 func main() {
-	// environment variables
-	var cfg config
+	var cfg Config
 
 	err := envconfig.Process("", &cfg)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("error %v", err)
 	}
 
-	var r account.Repository
+	var r catalog.Repository
 	retry.ForeverSleep(2*time.Second, func(_ int) (err error) {
-
-		r, err = account.NewPostgresRepository(cfg.DatabaseURL)
+		r, err = catalog.NewElasticRepository(cfg.DatabaseURL)
 		if err != nil {
 			log.Println(err)
 		}
 		return err
+
 	})
 	defer r.Close()
+	log.Println("listening on port 8080...")
 
-	// starting grpc server
-	log.Println("Server Started on port 8080...")
+	s := catalog.NewCatalogService(r)
 
-	s := account.NewService(r)
-	log.Fatal(account.ListenGRPC(s, 8080))
+	log.Fatal(catalog.ListenGRPC(s, 8080))
 }
