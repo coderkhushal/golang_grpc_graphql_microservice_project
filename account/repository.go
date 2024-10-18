@@ -3,6 +3,8 @@ package account
 import (
 	"context"
 	"database/sql"
+
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 type Repository interface {
@@ -16,7 +18,8 @@ type postgresRepository struct {
 }
 
 func NewPostgresRepository(url string) (Repository, error) {
-	db, err := sql.Open("postgres", url)
+
+	db, err := sql.Open("pgx", url)
 	if err != nil {
 		return nil, err
 	}
