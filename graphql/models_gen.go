@@ -45,7 +45,7 @@ type PaginationInput struct {
 
 type Product struct {
 	ID          string  `json:"id"`
-	Nmae        string  `json:"nmae"`
+	Name        string  `json:"nmae"`
 	Description string  `json:"description"`
 	Price       float64 `json:"price"`
 }

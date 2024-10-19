@@ -19,6 +19,7 @@ type postgresRepository struct {
 }
 
 func NewPostgresRepository(url string) (Repository, error) {
+
 	db, err := sql.Open("pgx", url)
 	if err != nil {
 		return nil, err
@@ -28,11 +29,8 @@ func NewPostgresRepository(url string) (Repository, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &postgresRepository{
-		db: db,
-	}, nil
+	return &postgresRepository{db}, nil
 }
-
 func (r *postgresRepository) Close() {
 	r.db.Close()
 }
@@ -57,7 +55,7 @@ func (r *postgresRepository) PutOrder(ctx context.Context, o Order) error {
 	if err != nil {
 		return err
 	}
-
+	// insert order products
 	stmt, _ := tx.PrepareContext(ctx, pq.CopyIn("order_products", "order_id", "product_id", "quantity"))
 	for _, p := range o.Products {
 		_, err = stmt.ExecContext(ctx, o.ID, p.ID, p.Quantity)

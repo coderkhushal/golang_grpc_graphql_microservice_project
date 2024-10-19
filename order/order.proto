@@ -11,7 +11,7 @@ message Order{
         uint64 quantity= 5;
     }    
     string id = 1;
-    string createdAt = 2;
+    bytes createdAt = 2;
     string accountId = 3;
     double totalPrice = 4;
     repeated OrderProduct products = 5;
