@@ -38,19 +38,19 @@ func NewGraphQLServer(accountUrl, catalogUrl, orderUrl string) (*Server, error) 
 	}, nil
 }
 
-func (s *Server) Mutation() *mutationresolver {
-	return &mutationresolver{
+func (s *Server) Mutation() MutationResolver {
+	return &Mutationresolver{
 		server: s,
 	}
 }
 
-func (s *Server) Query() *queryresolver {
+func (s *Server) Query() QueryResolver {
 	return &queryresolver{
 		server: s,
 	}
 }
-func (s *Server) Account() *accountresolver {
-	return &accountresolver{
+func (s *Server) Account() AccountResolver {
+	return &Accountresolver{
 		server: s,
 	}
 }
