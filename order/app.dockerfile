@@ -1,24 +1,26 @@
 # Build Stage
-FROM golang:1.13-alpine3.11 AS build
+FROM golang:1.23.1-alpine AS build
 # Install necessary build tools
 RUN apk --no-cache add gcc g++ make ca-certificates
-WORKDIR /go/src/github.com/akhilsharma90/go-graphql-microservice
+WORKDIR /go/src/github.com/coderkhushal/go-grpc-graphql-microservices
 
-# Copy Go mod and sum files first to cache dependencies (faster builds)
+# Copy Go mod and sum files first to cache dependencies
 COPY go.mod go.sum ./
 
 # Download dependencies
 RUN go mod download
 
-# Copy the source code
+# Copy the vendor directory (if you are using vendoring)
 COPY vendor vendor
-COPY order order
+
+# Copy the entire project source
+COPY . .
 
 # Build the Go application
 RUN GO111MODULE=on go build -mod vendor -o /go/bin/app ./order/cmd/order
 
 # Runtime Stage
-FROM alpine:3.11
+FROM alpine
 WORKDIR /usr/bin
 
 # Copy the built application from the build stage
