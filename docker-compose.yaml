@@ -79,7 +79,7 @@ services:
 
   account_db:
     build:
-      context: ./order  # Adjust based on the actual path to your db.dockerfile
+      context: ./account # Adjust based on the actual path to your db.dockerfile
       dockerfile: db.dockerfile
     environment:
       POSTGRES_DB: akhil
