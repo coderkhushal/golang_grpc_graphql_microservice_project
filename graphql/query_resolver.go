@@ -6,15 +6,15 @@ import (
 	"time"
 )
 
-type queryresolver struct {
+type queryResolver struct {
 	server *Server
 }
 
-func (r *queryresolver) Accounts(ctx context.Context, pagination *PaginationInput, id *string) ([]*Account, error) {
+func (r *queryResolver) Accounts(ctx context.Context, pagination *PaginationInput, id *string) ([]*Account, error) {
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 	if id != nil {
-		r, err := r.server.accoutClient.GetAccount(ctx, *id)
+		r, err := r.server.accountClient.GetAccount(ctx, *id)
 		if err != nil {
 			log.Println(err)
 			return nil, err
@@ -31,7 +31,7 @@ func (r *queryresolver) Accounts(ctx context.Context, pagination *PaginationInpu
 		skip, take = *pagination.Skip, *pagination.Take
 	}
 
-	accountList, err := r.server.accoutClient.GetAccounts(ctx, skip, take)
+	accountList, err := r.server.accountClient.GetAccounts(ctx, skip, take)
 
 	if err != nil {
 		log.Println(err)
@@ -47,7 +47,7 @@ func (r *queryresolver) Accounts(ctx context.Context, pagination *PaginationInpu
 	return accounts, nil
 
 }
-func (r *queryresolver) Products(ctx context.Context, pagination *PaginationInput, query *string, id *string) ([]*Product, error) {
+func (r *queryResolver) Products(ctx context.Context, pagination *PaginationInput, query *string, id *string) ([]*Product, error) {
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 	if id != nil {

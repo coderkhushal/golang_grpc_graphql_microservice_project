@@ -1,4 +1,4 @@
-version: "3.7"
+version: "3.8"
 
 services:
   account:
@@ -9,7 +9,14 @@ services:
       - account_db
     environment:
       DATABASE_URL: postgres://akhil:123456@account_db/akhil?sslmode=disable
+    networks:
+      - backend
     restart: on-failure
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U akhil -d akhil -h account_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   catalog:
     build:
@@ -19,7 +26,14 @@ services:
       - catalog_db
     environment:
       DATABASE_URL: http://catalog_db:9200
+    networks:
+      - backend
     restart: on-failure
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://catalog_db:9200 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   order:
     build:
@@ -29,47 +43,94 @@ services:
       - order_db
     environment:
       DATABASE_URL: postgres://akhil:123456@order_db/akhil?sslmode=disable
-      ACCOUNT_SERVICE_URL: account:8080
-      CATALOG_SERVICE_URL: catalog:8080
+      ACCOUNT_SERVICE_URL: http://account:8080
+      CATALOG_SERVICE_URL: http://catalog:8080
+    networks:
+      - backend
     restart: on-failure
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U akhil -d akhil -h order_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   graphql:
     build:
       context: .
       dockerfile: ./graphql/app.dockerfile
     ports:
-      - 8000:8080
+      - "8000:8080"
     depends_on:
       - account
       - catalog
+      - order
     environment:
-      ACCOUNT_SERVICE_URL: account:8080
-      CATALOG_SERVICE_URL: catalog:8080
-      ORDER_SERVICE_URL: order:8080
-    restart: on-failure
+      ACCOUNT_SERVICE_URL: http://account:8080
+      CATALOG_SERVICE_URL: http://catalog:8080
+      ORDER_SERVICE_URL: http://order:8080
+      OTEL_EXPORTER_OTLP_ENDPOINT: ""
+    networks:
+      - backend
+    restart: "no"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   account_db:
-    build:
-      context: ./account
-      dockerfile: ./db.dockerfile
+    image: postgres:14
     environment:
       POSTGRES_DB: akhil
       POSTGRES_USER: akhil
-      POSTGRES_PASSWORD: 123456
+      POSTGRES_PASSWORD: 123456  # Hardcoded password
+    ports:
+      - "5434:5432"
+    networks:
+      - backend
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U akhil -d akhil"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   catalog_db:
     image: docker.elastic.co/elasticsearch/elasticsearch:6.2.4
     environment:
       ES_JAVA_OPTS: -Xms1g -Xmx1g
       discovery.type: single-node
-
+    ports:
+      - "9200:9200"
+    networks:
+      - backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
   order_db:
-    build:
-      context: ./order
-      dockerfile: ./db.dockerfile
+    image: postgres:14
     environment:
       POSTGRES_DB: akhil
       POSTGRES_USER: akhil
-      POSTGRES_PASSWORD: 123456
+      POSTGRES_PASSWORD: 123456  # Hardcoded password
+    ports:
+      - "5433:5432"
+    networks:
+      - backend
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U akhil -d akhil"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  backend:
+    driver: bridge

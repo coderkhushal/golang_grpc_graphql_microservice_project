@@ -1,16 +1,16 @@
+//go:generate go run github.com/99designs/gqlgen
 package main
 
 import (
 	"log"
 	"net/http"
 
-	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/99designs/gqlgen/handler"
 	"github.com/kelseyhightower/envconfig"
 )
 
 type AppConfig struct {
-	AccountURL string `envconfig:"ACCOUNT_SERVER_URL"`
+	AccountURL string `envconfig:"ACCOUNT_SERVICE_URL"`
 	CatalogURL string `envconfig:"CATALOG_SERVICE_URL"`
 	OrderURL   string `envconfig:"ORDER_SERVICE_URL"`
 }
@@ -21,11 +21,14 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	s, err := NewGraphQLServer(cfg.AccountURL, cfg.CatalogURL, cfg.OrderURL)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	http.Handle("/graphql", handler.GraphQL(s.ToExecutableSchema()))
-	http.Handle("/playground", playground.Handler("khushal", "/playground"))
+	http.Handle("/playground", handler.Playground("khushal", "/graphql"))
+
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }

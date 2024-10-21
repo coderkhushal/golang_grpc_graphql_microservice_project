@@ -15,7 +15,7 @@ COPY vendor vendor
 COPY catalog catalog
 
 # Build the Go application
-RUN GO111MODULE=on go build -mod vendor -o /go/bin/app ./order/cmd/order
+RUN GO111MODULE=on go build -mod vendor -o /go/bin/app ./catalog/cmd/catalog
 
 # Runtime Stage
 FROM alpine

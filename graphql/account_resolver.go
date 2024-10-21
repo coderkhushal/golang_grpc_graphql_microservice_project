@@ -6,11 +6,11 @@ import (
 	"time"
 )
 
-type Accountresolver struct {
+type accountResolver struct {
 	server *Server
 }
 
-func (r *Accountresolver) Orders(ctx context.Context, obj *Account) ([]*Order, error) {
+func (r *accountResolver) Orders(ctx context.Context, obj *Account) ([]*Order, error) {
 
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()

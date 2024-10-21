@@ -8,49 +8,54 @@ import (
 )
 
 type Server struct {
-	accoutClient  *account.Client
+	accountClient *account.Client
 	catalogClient *catalog.Client
 	orderClient   *order.Client
 }
 
-func NewGraphQLServer(accountUrl, catalogUrl, orderUrl string) (*Server, error) {
+func NewGraphQLServer(accountUrl, catalogURL, orderURL string) (*Server, error) {
+	// Connect to account service
 	accountClient, err := account.NewClient(accountUrl)
 	if err != nil {
 		return nil, err
 	}
 
-	catalogClient, err := catalog.NewClient(catalogUrl)
+	// Connect to product service
+	catalogClient, err := catalog.NewClient(catalogURL)
 	if err != nil {
 		accountClient.Close()
 		return nil, err
 	}
-	orderClient, err := order.NewClient(orderUrl)
 
+	// Connect to order service
+	orderClient, err := order.NewClient(orderURL)
 	if err != nil {
-		orderClient.Close()
 		accountClient.Close()
+		catalogClient.Close()
 		return nil, err
 	}
+
 	return &Server{
-		accoutClient:  accountClient,
-		orderClient:   orderClient,
-		catalogClient: catalogClient,
+		accountClient,
+		catalogClient,
+		orderClient,
 	}, nil
 }
 
 func (s *Server) Mutation() MutationResolver {
-	return &Mutationresolver{
+	return &mutationResolver{
 		server: s,
 	}
 }
 
 func (s *Server) Query() QueryResolver {
-	return &queryresolver{
+	return &queryResolver{
 		server: s,
 	}
 }
+
 func (s *Server) Account() AccountResolver {
-	return &Accountresolver{
+	return &accountResolver{
 		server: s,
 	}
 }

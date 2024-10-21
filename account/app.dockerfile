@@ -15,7 +15,7 @@ COPY vendor vendor
 COPY account account
 
 # Build the Go application
-RUN GO111MODULE=on go build -mod vendor -o /go/bin/app ./order/cmd/order
+RUN GO111MODULE=on go build -mod vendor -o /go/bin/app ./account/cmd/account
 
 # Runtime Stage
 FROM alpine

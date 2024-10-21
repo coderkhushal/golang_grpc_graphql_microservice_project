@@ -12,7 +12,7 @@ RUN go mod download
 
 # Copy the vendor directory (if you are using vendoring)
 COPY vendor vendor
-
+COPY order order
 # Copy the entire project source
 COPY . .
 
