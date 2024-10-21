@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/coderkhushal/go-grpc-graphql-microservices/account"
 	"github.com/coderkhushal/go-grpc-graphql-microservices/catalog"
@@ -15,6 +17,7 @@ type Server struct {
 
 func NewGraphQLServer(accountUrl, catalogURL, orderURL string) (*Server, error) {
 	// Connect to account service
+	fmt.Println(accountUrl, catalogURL, orderURL)
 	accountClient, err := account.NewClient(accountUrl)
 	if err != nil {
 		return nil, err
